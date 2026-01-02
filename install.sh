@@ -23,6 +23,57 @@ need_root(){
   fi
 }
 
+# --- TTY handling for curl | bash installers ---
+TTY_FD=3
+
+open_tty(){
+  # If stdin is already a TTY, we can just read normally from stdin.
+  if [[ -t 0 ]]; then
+    return 0
+  fi
+
+  # If stdin is not a TTY (e.g., curl | bash), use /dev/tty for prompts.
+  if [[ -r /dev/tty ]]; then
+    exec {TTY_FD}</dev/tty
+    return 0
+  fi
+
+  err "No interactive TTY available."
+  err "Do not run this installer in a context without a terminal."
+  err "Use: curl -fsSL <url> -o install.sh && sudo bash install.sh"
+  exit 1
+}
+
+read_prompt(){
+  # Usage: read_prompt [-s] "Prompt text" varname
+  local secret="no"
+  if [[ "${1:-}" == "-s" ]]; then
+    secret="yes"
+    shift
+  fi
+  local prompt_text="$1"
+  local __varname="$2"
+  local __val=""
+
+  if [[ -t 0 ]]; then
+    if [[ "$secret" == "yes" ]]; then
+      read -r -s -p "${prompt_text}" __val
+      echo
+    else
+      read -r -p "${prompt_text}" __val
+    fi
+  else
+    if [[ "$secret" == "yes" ]]; then
+      read -r -s -u "${TTY_FD}" -p "${prompt_text}" __val
+      echo
+    else
+      read -r -u "${TTY_FD}" -p "${prompt_text}" __val
+    fi
+  fi
+
+  printf -v "${__varname}" "%s" "${__val}"
+}
+
 trim(){
   local s="$1"
   s="${s#"${s%%[![:space:]]*}"}"
@@ -65,22 +116,20 @@ prompt(){
   while true; do
     if [[ -n "$default" ]]; then
       if [[ "$secret" == "yes" ]]; then
-        read -r -s -p "${text} [default hidden]: " val
-        echo
+        read_prompt -s "${text} [default hidden]: " val
         val="$(trim "$val")"
         [[ -z "$val" ]] && val="$default"
       else
-        read -r -p "${text} [${default}]: " val
+        read_prompt "${text} [${default}]: " val
         val="$(trim "$val")"
         [[ -z "$val" ]] && val="$default"
       fi
     else
       if [[ "$secret" == "yes" ]]; then
-        read -r -s -p "${text}: " val
-        echo
+        read_prompt -s "${text}: " val
         val="$(trim "$val")"
       else
-        read -r -p "${text}: " val
+        read_prompt "${text}: " val
         val="$(trim "$val")"
       fi
     fi
@@ -97,8 +146,9 @@ yesno(){
   local text="$2"
   local default="${3:-y}"
   local ans=""
+
   while true; do
-    read -r -p "${text} [y/n] (default ${default}): " ans
+    read_prompt "${text} [y/n] (default ${default}): " ans
     ans="$(trim "$ans")"
     [[ -z "$ans" ]] && ans="$default"
     case "$ans" in
@@ -308,7 +358,7 @@ show_failure_menu(){
     echo
 
     local choice=""
-    read -r -p "Choose [1-5]: " choice
+    read_prompt "Choose [1-5]: " choice
     choice="$(trim "$choice")"
     case "$choice" in
       1) return 10;;
@@ -390,7 +440,7 @@ collect_settings(){
     prompt pw "Pi-hole v6 application password (no re-entry)" "" "yes"
 
     local showpw="n"
-    read -r -p "Show password for verification on-screen? [y/n] (default n): " showpw
+    read_prompt "Show password for verification on-screen? [y/n] (default n): " showpw
     showpw="$(trim "$showpw")"
     [[ -z "$showpw" ]] && showpw="n"
     if [[ "$showpw" =~ ^[yY]$ ]]; then
@@ -450,6 +500,7 @@ run_api_tests(){
 
 main(){
   need_root
+  open_tty
   install_packages
 
   while true; do
