@@ -132,6 +132,18 @@ sudo rm /etc/systemd/system/event-horizon.service
 sudo systemctl daemon-reload
 ```
 
+## This is an early release
+
+This is an early release, so you may encounter bugs. If you do, please report them via [GitHub Issues](https://github.com/jbswaff/event-horizon/issues).
+. When reporting an issue, please include the following details:
+
+1. Event Horizon version or commit hash
+2. Pi-hole version
+3. Event Horizon log files, if applicable
+4. Steps to reproduce
+5. Screenshots or error messages
+6. Network setup (are you running VLANs? Is there any other relevent information?)
+7. Any changes made to the source code
 
 **Acknowledgments**
 - [Pi-hole](https://pi-hole.net) for providing an easy-to-use and powerful ad-blocking solution.
