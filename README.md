@@ -7,6 +7,10 @@ Event Horizon communicates with Pi-hole v6 using its public HTTP API. No Pi-hole
 
 Keeping with Pi-hole's block-hole theme, the name Event Horizon was inspired by the concept of a critical boundary in space - once something crosses it, there's no turning back. Much like the event horizon, this service puts control into the hands of users on your network. When the ad blocker is disabled, you cross a threshold into a filterless web experience. Just as space's event horizon signifies a point of no return, disabling your adblocker marks a shift in how you experience the internet.
 
+![Event Horizon Main Page](/images/event-horizon-main.png)
+
+![Event Horizon Results](/images/event-horizon-results.png)
+
 ## Who is Event Horizon for?
 
 - Anyone who manages Pi-hole for other people who dneed a simple way to disable blocking on-demand. The creator of this service deployed Pi-hole on their grandparent's network as a way of protecting them from malicious ads, but since they are non-technical, needed a way for them to disable blocking on two piholes with a single click - no complex UI, no logins.
@@ -78,6 +82,8 @@ You can manually edit this file to update settings if needed, but the installati
 ## Logs
 
 The logs for each time ad blocking is disabled are stored in `/var/log/event-horizon/requests.log`. You can view the logs directly from the web interface if you enabled the log link during installation. If you chose not to display a link to logs on the main page, you can still access the logs here: http://<Event-Viewer-IP-or-Hostname>:PORT/logs
+
+![Event Horizon Logs](/images/event-horizon-logs.png)
 
 The logs contain:
 
