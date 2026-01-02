@@ -20,10 +20,10 @@ Keeping with Pi-hole's block-hole theme, the name Event Horizon was inspired by 
 
 ## Features
 
-- **Pi-hole v6 Support**: This service is **compatible with Pi-hole v6**. If you're running Pi-hole v5 or earlier, this service will not work. Support for v5 may be added later, but is not planned at this time.
-- **Multiple Pi-hole Support**: You can manage multiple Pi-hole instances from a single Event Horizon server with a single button.
-- **Web Interface**: A simple, mobile-friendly interface with a single button to disable Pi-hole's ad blocking for a specified duration (specified in server config).
-- **API Integration**: The service interacts directly with Pi-hole's API, no SSH or additional configuration required on Pi-hole.
+- **Works with Pi-hole v6**: If you're running Pi-hole v5 or earlier, this service will not work. Support for v5 may be added later, but is not planned at this time.
+- **Manage Pi-hole instances with one button**: You can manage multiple Pi-hole instances from a single Event Horizon server with a single button.
+- **User Friendly Web Interface**: A simple, mobile-friendly interface with a single button to disable Pi-hole's ad blocking for a specified duration (specified in server config).
+- **API Integration**: The service interacts directly with Pi-hole's HTTP API, no SSH or changes required to Pi-hole other than generating an application password via the Pi-hole web UI.
 - **Logs**: Logs are automatically generated each time the ad blocker is disabled, and the logs are accessible through the web interface. You decide whether or not to include a link on the main page for the logs.
 - **Customizable Disable Time**: The default duration is 10 minutes, but this can be configured during installation.
 
