@@ -3,7 +3,18 @@
 Event Horizon is a lightweight Pi-hole-companion that allows network users to temporarily disable Pi-hole without a complex UI, presented on a simple web page. 
 Event Horizon is a lightweight Pi-hole-companion designed for controlling Pi-hole's ad blocking feature on-demand by non-technical users who do not need or desire access to the Pi-hole admin web UI. It allows network users to disable Pi-hole's ad blocking for a set duration (configured during install or via event-horizon.conf any time after install) through a simple, user-friendly web interface. The service uses the Pi-hole API to interact with one or multiple Pi-hole instances, and it logs each action for transparency and administration ease.
 
-he name Event Horizon was inspired by the concept of a critical boundary in space—once something crosses it, there's no turning back. Much like the event horizon, this service puts control into the hands of users on your network. When the ad blocker is disabled, you cross a threshold into a filterless web experience. Just as space's event horizon signifies a point of no return, disabling your adblocker marks a shift in how you experience the internet.
+Event Horizon communicates with Pi-hole v6 using its public HTTP API. No Pi-hole source code is used or redistributed.
+
+Keeping with Pi-hole's block-hole theme, the name Event Horizon was inspired by the concept of a critical boundary in space - once something crosses it, there's no turning back. Much like the event horizon, this service puts control into the hands of users on your network. When the ad blocker is disabled, you cross a threshold into a filterless web experience. Just as space's event horizon signifies a point of no return, disabling your adblocker marks a shift in how you experience the internet.
+
+## Who is Event Horizon for?
+
+- Anyone who manages Pi-hole for other people who dneed a simple way to disable blocking on-demand. The creator of this service deployed Pi-hole on their grandparent's network as a way of protecting them from malicious ads, but since they are non-technical, needed a way for them to disable blocking on two piholes with a single click - no complex UI, no logins.
+
+## How does Event Horizon get displayed?
+
+- Option 1: Via link or bookmark. Access Event Horizon from any device on the network (firwall permitting) on demand via a link, device bookmark
+- Option 2: Create a custom "block" html page in each Pi-hole which contains a link to this page or an iframe
 
 ---
 
@@ -20,7 +31,7 @@ he name Event Horizon was inspired by the concept of a critical boundary in spac
 
 ## Security Warning
 
-> **IMPORTANT**: This service **does not** include any form of authentication or encryption (TLS). You must firewall this service yourself to restrict access from access outside your network.
+> **IMPORTANT**: This service intentionally **does not** include any form of authentication or encryption (TLS). You must firewall this service yourself to restrict access from access outside your network.
 
 ---
 
@@ -30,15 +41,15 @@ To install the Event Horizon server, you can use the following one-line command.
 
 ### Requirements
 
-- **Pi-hole v6**: This service works with Pi-hole v6 only.
-- **Python 3.x**: The service is written in Python 3.
+- **Pi-hole v6**: You should already have at least one Pi-hole instance in operation. This service works with Pi-hole v6 only at this time.
 - **Internet Access**: To download the required files.
+- **A system to run Event Horizon on**: This service is lightweight and can run alongside Pi-hole on the same Raspberry Pi, or you can use a dedicated piece of hardware.
 
 Event Horizon is lightweight by design and can be run alongside Pi-hole, even on a Raspberry Pi. Only one instance of Event Horizon is needed for a group of Pi-holes, as it is able to manage multiple Pi-hole instances.
 
 ### Installation Steps
 
-1. **Download the installer**:
+1. **Run the installer**:
    The easiest method is to use `curl` to download and execute the installer:
 
 
@@ -121,7 +132,17 @@ sudo rm /etc/systemd/system/event-horizon.service
 sudo systemctl daemon-reload
 ```
 
+
 **Acknowledgments**
-Pi-hole v6 for providing an easy-to-use and powerful ad-blocking solution.
-The Python community for their continued work on the Python ecosystem.
-This project is developed and maintained by Joshua Swafford for the Pi-hole community.
+- [Pi-hole](https://pi-hole.net) for providing an easy-to-use and powerful ad-blocking solution.
+- The Python community for their continued work on the Python ecosystem.
+- The r/pihole community for the encouragement to build this service into a deployable package.
+- This project is developed and maintained by Joshua Swafford for the Pi-hole community.
+
+
+**Legal Notice**:
+- Pi-hole is a registered trademark of Pi-hole, LLC.
+- This project is neither affiliated with nor endorsed by Pi-hole, LLC.
+- Event Horizon interacts with Pi-hole exclusively through its public HTTP API.
+- No Pi-hole source code is used, redistributed, or modified in any way by Event Horizon.
+
