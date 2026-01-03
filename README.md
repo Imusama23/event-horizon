@@ -1,3 +1,5 @@
+Current release: v0.2.0-beta.1
+
 # Event Horizon - Pi-hole v6 Ad Blocking Control
 
 Event Horizon is a lightweight Pi-hole-companion that allows network users to temporarily disable Pi-hole without a complex UI, presented on a simple web page. 
