@@ -1,168 +1,263 @@
-Current release: v0.2.0-beta.1
+# Event Horizon - v0.3.2-beta.1
 
-# Event Horizon - Pi-hole v6 Ad Blocking Control
-
-Event Horizon is a lightweight Pi-hole-companion that allows network users to temporarily disable Pi-hole without a complex UI, presented on a simple web page. 
-Event Horizon is a lightweight Pi-hole-companion designed for controlling Pi-hole's ad blocking feature on-demand by non-technical users who do not need or desire access to the Pi-hole admin web UI. It allows network users to disable Pi-hole's ad blocking for a set duration (configured during install or via event-horizon.conf any time after install) through a simple, user-friendly web interface. The service uses the Pi-hole API to interact with one or multiple Pi-hole instances, and it logs each action for transparency and administration ease.
-
-Event Horizon communicates with Pi-hole v6 using its public HTTP API. No Pi-hole source code is used or redistributed.
-
-Keeping with Pi-hole's block-hole theme, the name Event Horizon was inspired by the concept of a critical boundary in space - once something crosses it, there's no turning back. Much like the event horizon, this service puts control into the hands of users on your network. When the ad blocker is disabled, you cross a threshold into a filterless web experience. Just as space's event horizon signifies a point of no return, disabling your adblocker marks a shift in how you experience the internet.
-
-![Event Horizon Main Page](/images/event-horizon-main.png)
-
-![Event Horizon Results](/images/event-horizon-results.png)
-
-## Who is Event Horizon for?
-
-- Anyone who manages Pi-hole for other people who dneed a simple way to disable blocking on-demand. The creator of this service deployed Pi-hole on their grandparent's network as a way of protecting them from malicious ads, but since they are non-technical, needed a way for them to disable blocking on two piholes with a single click - no complex UI, no logins.
-
-## How does Event Horizon get displayed?
-
-- Option 1: Via link or bookmark. Access Event Horizon from any device on the network (firwall permitting) on demand via a link, device bookmark
-- Option 2: Create a custom "block" html page in each Pi-hole which contains a link to this page or an iframe
-
----
+Per-client ad-blocking bypass for Pi-hole v6. Allows individual devices to temporarily pause ad blocking without affecting other users on the network.
 
 ## Features
 
-- **Works with Pi-hole v6**: If you're running Pi-hole v5 or earlier, this service will not work. Support for v5 may be added later, but is not planned at this time.
-- **Manage Pi-hole instances with one button**: You can manage multiple Pi-hole instances from a single Event Horizon server with a single button.
-- **User Friendly Web Interface**: A simple, mobile-friendly interface with a single button to disable Pi-hole's ad blocking for a specified duration (specified in server config).
-- **API Integration**: The service interacts directly with Pi-hole's HTTP API, no SSH or changes required to Pi-hole other than generating an application password via the Pi-hole web UI.
-- **Logs**: Logs are automatically generated each time the ad blocker is disabled, and the logs are accessible through the web interface. You decide whether or not to include a link on the main page for the logs.
-- **Customizable Disable Time**: The default duration is 10 minutes, but this can be configured during installation.
+- **Per-client bypass**: Only the requesting device gets ad blocking paused
+- **Automatic restore**: Filtering resumes automatically after the configured duration
+- **Multi Pi-hole support**: Works with multiple Pi-hole instances simultaneously
+- **Cancel anytime**: Users can resume blocking early with one click
+- **Dark mode**: Respects system color scheme preference
+- **Session caching**: Reduces API calls and avoids session limits
+- **API logging**: Full request/response logging for debugging
+- **Health endpoint**: JSON health status for monitoring and Docker healthchecks
 
----
+## Requirements
 
-## Security Warning
+- Pi-hole v6 or later
+- Docker (recommended) or Python 3.10+
 
-> **IMPORTANT**: This service intentionally **does not** include any form of authentication or encryption (TLS). You must firewall this service yourself to restrict access from access outside your network.
+## Quick Start
 
----
+### Docker Compose (Recommended)
 
-## Installation
+1. Create a `compose.yaml`:
 
-To install the Event Horizon server, you can use the following one-line command. It will handle all the necessary steps, including the installation of dependencies and configuring the service.
-
-### Requirements
-
-- **Pi-hole v6**: You should already have at least one Pi-hole instance in operation. This service works with Pi-hole v6 only at this time.
-- **Internet Access**: To download the required files.
-- **A system to run Event Horizon on**: This service is lightweight and can run alongside Pi-hole on the same Raspberry Pi, or you can use a dedicated piece of hardware.
-
-Event Horizon is lightweight by design and can be run alongside Pi-hole, even on a Raspberry Pi. Only one instance of Event Horizon is needed for a group of Pi-holes, as it is able to manage multiple Pi-hole instances.
-
-### Installation Steps
-
-1. **Run the installer**:
-   The easiest method is to use `curl` to download and execute the installer:
-
-
-```
-curl -fsSL https://raw.githubusercontent.com/jbswaff/event-horizon/main/install.sh | sudo bash
+```yaml
+services:
+  event-horizon:
+    image: ghcr.io/jbswaff/event-horizon:latest
+    container_name: event-horizon
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      EH_PIHOLE_COUNT: "1"
+      EH_PIHOLE_1_NAME: "pihole"
+      EH_PIHOLE_1_URL: "http://192.168.1.2"
+      EH_PIHOLE_1_APP_PASSWORD: "your-app-password-here"
 ```
 
+2. Start the container:
 
-2. **During installation**, you will be prompted to provide the following configuration details:
-- The **Pi-hole IP addresses** and **API password** for each Pi-hole instance. It is recommended to use an application password generated from the Pi-hole web UI instead of your top-level password.
-- The **duration for disabling ad blocking** (in minutes).
-- Whether to **show a link to logs** on the main page.
-
-The installation script will automatically configure the necessary files and services for you. The installer will automatically test API connectivity during the installation process, alerting you to an issue early.
-
----
-
-## Configuration File
-
-The configuration file is located at `/etc/event-horizon/event-horizon.conf`. It contains all the configuration options for the service, including Pi-hole instances and settings for the disable time and logs visibility.
-
-You can manually edit this file to update settings if needed, but the installation script will handle the configuration by default.
-
----
-
-## Logs
-
-The logs for each time ad blocking is disabled are stored in `/var/log/event-horizon/requests.log`. You can view the logs directly from the web interface if you enabled the log link during installation. If you chose not to display a link to logs on the main page, you can still access the logs here: http://<Event-Viewer-IP-or-Hostname>:PORT/logs
-
-![Event Horizon Logs](/images/event-horizon-logs.png)
-
-The logs contain:
-
-- The **IP address** of the user who triggered the action.
-- The **Pi-hole instances** affected and their responses.
-- The **time** when the action was performed. Be sure to check the time zone of the system running Event Viewer to avoid confusion later.
-
----
-
-## Service Control
-
-Once installed, the service is automatically started and enabled to run on boot. You can manage the service with the following commands:
-
-- **Start the service**:  
-```
-sudo systemctl start event-horizon.service
+```bash
+docker compose up -d
 ```
 
-- **Stop the service***:
-```
-sudo systemctl stop event-horizon.service
+3. Access the web interface at `http://your-server:8080`
+
+### Getting Your Pi-hole App Password
+
+1. Log into your Pi-hole admin interface
+2. Go to **Settings** > **API** > **App Password**
+3. Generate a new app password
+4. Copy the password and use it for `EH_PIHOLE_X_APP_PASSWORD`
+
+## Configuration
+
+All configuration is done via environment variables (prefix with `EH_`).
+
+### Required Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EH_PIHOLE_COUNT` | Number of Pi-hole instances | `1` |
+| `EH_PIHOLE_X_NAME` | Display name for Pi-hole X | `piholeX` |
+| `EH_PIHOLE_X_URL` | URL for Pi-hole X (e.g., `http://192.168.1.2`) | - |
+| `EH_PIHOLE_X_APP_PASSWORD` | App password for Pi-hole X | - |
+
+### Optional Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EH_PORT` | Web server port | `8080` |
+| `EH_DISABLE_MINUTES` | Bypass duration in minutes | `10` |
+| `EH_COOLDOWN_SECONDS` | Minimum time between requests per client | `3` |
+| `EH_BYPASS_GROUP_NAME` | Name of the Pi-hole group for bypassed clients | `Event-Horizon-Bypass` |
+
+### Reverse Proxy Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EH_TRUST_PROXY` | Trust X-Forwarded-For headers | `false` |
+| `EH_TRUSTED_PROXY_NETS` | Trusted proxy networks (comma-separated CIDRs) | `10.0.0.0/8,192.168.0.0/16` |
+
+### API Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EH_VERIFY_SSL` | Verify SSL certificates for Pi-hole connections | `true` |
+| `EH_API_TIMEOUT` | API request timeout in seconds | `15` |
+| `EH_API_MAX_RETRIES` | Number of retry attempts for failed requests | `3` |
+| `EH_API_RETRY_DELAY` | Initial retry delay in seconds (exponential backoff) | `1` |
+| `EH_SESSION_CACHE_TTL` | Session cache duration in seconds | `300` |
+
+### Logging Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EH_SHOW_LOG_LINK` | Show link to logs on main page | `true` |
+| `EH_LOG_DIR` | Log directory path | `/var/log/event-horizon` |
+| `EH_API_LOG_ENABLED` | Enable API request/response logging | `true` |
+| `EH_LOG_MAX_SIZE_MB` | Max log file size before rotation | `10` |
+| `EH_LOG_MAX_AGE_DAYS` | Max log age before rotation | `7` |
+| `EH_HEALTH_CACHE_SECONDS` | Health check cache duration | `5` |
+
+### Rate Limiting Settings
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `EH_RATE_LIMIT_REQUESTS` | Max bypass requests per time window (0 to disable) | `10` |
+| `EH_RATE_LIMIT_WINDOW` | Rate limit window in seconds | `3600` |
+
+## Multi Pi-hole Setup
+
+For redundant Pi-hole setups, configure multiple instances:
+
+```yaml
+environment:
+  EH_PIHOLE_COUNT: "2"
+
+  EH_PIHOLE_1_NAME: "pihole-primary"
+  EH_PIHOLE_1_URL: "http://192.168.1.2"
+  EH_PIHOLE_1_APP_PASSWORD: "password-for-primary"
+
+  EH_PIHOLE_2_NAME: "pihole-secondary"
+  EH_PIHOLE_2_URL: "http://192.168.1.3"
+  EH_PIHOLE_2_APP_PASSWORD: "password-for-secondary"
 ```
 
-- **Enable the service on boot**:
-```
-sudo systemctl enable event-horizon.service
-```
+## Reverse Proxy Configuration
 
-- **Disable the service on boot**:
-```
-curl -fsSL https://raw.githubusercontent.com/jbswaff/event-horizon/main/install.sh
- | sudo bash
-```
+### Nginx
 
-- **Check the status of the service**:
-```
-sudo systemctl status event-horizon.service
-```
+```nginx
+server {
+    listen 80;
+    server_name adblock.example.com;
 
-- **View logs of the service**:
-```
-journalctl -u event-horizon.service -n 200 --no-pager
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
 
-- **Uninstallation**:
-  To uninstall Event Horizon, run the following commands:
-```
-sudo systemctl stop event-horizon.service
-sudo systemctl disable event-horizon.service
-sudo rm -rf /opt/event-horizon /etc/event-horizon /var/log/event-horizon
-sudo rm /etc/systemd/system/event-horizon.service
-sudo systemctl daemon-reload
+Enable proxy trust in Event Horizon:
+
+```yaml
+environment:
+  EH_TRUST_PROXY: "true"
+  EH_TRUSTED_PROXY_NETS: "127.0.0.1/32,10.0.0.0/8"
 ```
 
-## This is an early release
+### Traefik
 
-This is an early release, so you may encounter bugs. If you do, please report them via [GitHub Issues](https://github.com/jbswaff/event-horizon/issues).
-. When reporting an issue, please include the following details:
+```yaml
+labels:
+  - "traefik.enable=true"
+  - "traefik.http.routers.event-horizon.rule=Host(`adblock.example.com`)"
+  - "traefik.http.services.event-horizon.loadbalancer.server.port=8080"
+```
 
-1. Event Horizon version or commit hash
-2. Pi-hole version
-3. Event Horizon log files, if applicable
-4. Steps to reproduce
-5. Screenshots or error messages
-6. Network setup (are you running VLANs? Is there any other relevent information?)
-7. Any changes made to the source code
+## API Endpoints
 
-**Acknowledgments**
-- [Pi-hole](https://pi-hole.net) for providing an easy-to-use and powerful ad-blocking solution.
-- The Python community for their continued work on the Python ecosystem.
-- The r/pihole community for the encouragement to build this service into a deployable package.
-- This project is developed and maintained by Joshua Swafford for the Pi-hole community.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Main web interface |
+| `/disable` | POST | Pause ad blocking for the requesting client |
+| `/cancel` | POST | Resume ad blocking early |
+| `/health` | GET | JSON health status |
+| `/logs` | GET | View request logs |
+| `/logs?type=api` | GET | View API logs |
 
+### Health Endpoint Response
 
-**Legal Notice**:
-- Pi-hole is a registered trademark of Pi-hole, LLC.
-- This project is neither affiliated with nor endorsed by Pi-hole, LLC.
-- Event Horizon interacts with Pi-hole exclusively through its public HTTP API.
-- No Pi-hole source code is used, redistributed, or modified in any way by Event Horizon.
+```json
+{
+  "status": "healthy",
+  "version": "0.3.2-beta.1",
+  "piholes": [
+    {
+      "name": "pihole1",
+      "healthy": true,
+      "status": "healthy",
+      "version": " (v6.3)"
+    }
+  ],
+  "timestamp": "2026-01-12T02:34:11Z"
+}
+```
 
+## Docker Healthcheck
+
+The container includes a built-in healthcheck that queries the `/health` endpoint every 30 seconds.
+
+```bash
+# Check container health status
+docker inspect --format='{{.State.Health.Status}}' event-horizon
+```
+
+## Troubleshooting
+
+### "Unable to determine Pi-hole version"
+
+- Ensure Pi-hole is running v6 or later
+- Verify the URL is correct and accessible from the Event Horizon container
+- Check that the app password is valid
+
+### "API session limit reached"
+
+- Event Horizon caches sessions to minimize this issue
+- Increase `EH_SESSION_CACHE_TTL` if it persists
+- Check Pi-hole's `webserver.api.max_sessions` setting
+
+### SSL Certificate Errors
+
+For Pi-hole with self-signed certificates:
+
+```yaml
+environment:
+  EH_VERIFY_SSL: "false"
+```
+
+### View Logs
+
+```bash
+# Container logs
+docker logs event-horizon
+
+# Request logs
+docker exec event-horizon cat /var/log/event-horizon/requests.log
+
+# API logs
+docker exec event-horizon cat /var/log/event-horizon/api.log
+```
+
+## How It Works
+
+1. User visits Event Horizon and clicks "Pause Ad Blocking"
+2. Event Horizon authenticates with each configured Pi-hole
+3. Creates/updates a client entry for the user's IP address
+4. Moves the client to the "Event-Horizon-Bypass" group (which has no blocklists)
+5. Starts a timer to restore the original group membership
+6. When the timer expires (or user clicks "Resume"), the client is moved back
+
+## Security Considerations
+
+- The container runs as a non-root user
+- App passwords are not logged (only in POST body to auth endpoint)
+- XSS protection via HTML escaping
+- Rate limiting via cooldown period
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or pull request on GitHub.
